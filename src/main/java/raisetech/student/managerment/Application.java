@@ -19,7 +19,7 @@ public class Application {
 	}
 	@GetMapping("/hello")
 	public String hello(){
-		StringUtils.isAllBlank();
+		StringUtils.isAllBlank();//Apache Commons langの追加
 		return "Hello World";
 	}
 }
