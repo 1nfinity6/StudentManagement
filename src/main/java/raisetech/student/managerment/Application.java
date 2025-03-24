@@ -37,22 +37,23 @@ public class Application {
 		Student student = repository.searchByName(name);
 		return student.getName() + " " + student.getAge() + "歳";
 	}
-
+//作成　-X POST
 	@PostMapping("/student")
 	public void registerStudent(String name, int age) {
 		repository.registerStudent(name, age);
 	}
-
+//更新 -X PATCH
 	@PatchMapping("/student")
 	public void updateStudentName(String name, int age) {
 		repository.updateStudent(name, age);
 	}
-
+//削除 -X DELETE
 	@DeleteMapping("/student")
 	public void deleteStudent(String name) {
 		repository.deleteStudent(name);
 	}
 }
+
 	//GET:取得する,リクエストの結果を受け取る
 //POST:情報を与える・渡す
 

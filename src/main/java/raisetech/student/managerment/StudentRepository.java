@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
-@Mapper//これをつけるとMyBatisが処理すると認識する
+@Mapper//これをつけるとMyBatisが処理すると認識する.
 public interface StudentRepository {
 
   @Select("SELECT * FROM student WHERE name = #{name}")
