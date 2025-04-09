@@ -18,23 +18,11 @@ public class StudentService {
     this.repository = repository;
   }
 
-  /**
-   * 30代の受講生リストを取得
-   */
   public List<Student> searchStudentList() {
-    List<Student> allStudents = repository.search();
-    return allStudents.stream()
-        .filter(student -> student.getAge() >= 30 && student.getAge() < 40)
-        .collect(Collectors.toList());
+    return repository.search();
   }
 
-  /**
-   * Javaコースを受講している学生情報を取得
-   */
   public List<StudentsCourses> searchStudentsCoursesList() {
-    List<StudentsCourses> allCourses = repository.searchStudentsCourses();
-    return allCourses.stream()
-        .filter(course -> "Javaスタンダード".equals(course.getCourseName()))
-        .collect(Collectors.toList());
+    return repository.searchStudentsCourses();
   }
 }
