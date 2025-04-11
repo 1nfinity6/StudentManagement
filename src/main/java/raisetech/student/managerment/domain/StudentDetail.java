@@ -16,12 +16,4 @@ public class StudentDetail {
   private String remark;
   private boolean isDeleted;
 
-  public void setIsDeleted(boolean isDeleted) {
-    this.isDeleted = isDeleted;
-  }
-
-  public void setRemark(String remark) {
-    this.remark = remark;
-  }
-
 }

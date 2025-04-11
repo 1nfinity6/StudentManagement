@@ -26,7 +26,7 @@ public class StudentConverter {
       studentDetail.setStudentsCourses(convertStudentCourses);
 
       studentDetail.setRemark(student.getRemark());
-      studentDetail.setIsDeleted(student.isDeleted());
+      studentDetail.setDeleted(student.isDeleted());
 
       studentDetails.add(studentDetail);
     });
