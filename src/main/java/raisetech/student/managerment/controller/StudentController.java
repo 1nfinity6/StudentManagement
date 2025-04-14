@@ -19,8 +19,8 @@ import raisetech.student.managerment.service.StudentService;
 @Controller
 public class StudentController {
 
-  private StudentService service;
-  private StudentConverter converter;
+  private final StudentService service;
+  private final StudentConverter converter;
 
 
   @Autowired
@@ -33,7 +33,6 @@ public class StudentController {
   public String getStudentList(Model model) {
     List<Student> students = service.searchStudentList();
     List<StudentsCourses> studentsCourses = service.searchStudentsCoursesList();
-
     model.addAttribute("studentList", converter.convertStudentDetails(students, studentsCourses));
     return "studentList";
   }
@@ -51,31 +50,25 @@ public class StudentController {
     return "registerStudent";
   }
 
-  @PostMapping("/newStudent")
-  public String registerStudent(@ModelAttribute Student student) {
-    service.save(student);
-    return "redirect:/students";
-  }
-
   @PostMapping("/registerStudent")
   public String registerStudent(@ModelAttribute StudentDetail studentDetail,
       BindingResult result, Model model) {
     if (result.hasErrors()) {
       return "registerStudent";
     }
-    Student student = studentDetail.getStudent();
-
-    if ("MALE".equals(student.getGender())) {
-      student.setGender("男");
-    } else if ("FEMALE".equals(student.getGender())) {
-      student.setGender("女");
-    } else {
-      student.setGender("その他");
-    }
 
     service.registerStudentDetail(studentDetail);
     return "redirect:/studentList";
   }
+
+  @PostMapping("/updateStudent")
+  public String updateStudent(@ModelAttribute StudentDetail studentDetail,
+      BindingResult result, Model model) {
+    if (result.hasErrors()) {
+      return "editStudent";
+    }
+
+    service.updateStudentDetail(studentDetail);
+    return "redirect:/studentList";
+  }
 }
-
-

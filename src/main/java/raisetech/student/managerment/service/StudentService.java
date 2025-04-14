@@ -36,4 +36,18 @@ public class StudentService {
   public void save(Student student) {
     repository.insertStudent(student);
   }
+
+  public void updateStudentDetail(StudentDetail studentDetail) {
+    Student student = studentDetail.getStudent();
+
+    if ("MALE".equals(student.getGender())) {
+      student.setGender("男");
+    } else if ("FEMALE".equals(student.getGender())) {
+      student.setGender("女");
+    } else {
+      student.setGender("その他");
+    }
+
+    repository.updateStudent(student);
+  }
 }
