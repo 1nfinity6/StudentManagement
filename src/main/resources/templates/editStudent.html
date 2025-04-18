@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>受講生編集</title>
+</head>
+<body>
+<h1>受講生情報編集</h1>
+<form th:action="@{/students/update}" th:object="${student}" method="post">
+  <label for="name">名前:</label>
+  <input type="text" th:field="*{name}" id="name"><br>
+
+  <label for="kanaName">カナ名:</label>
+  <input type="text" th:field="*{kanaName}" id="kanaName"><br>
+
+  <label for="nickname">ニックネーム:</label>
+  <input type="text" th:field="*{nickname}" id="nickname"><br>
+
+  <label for="email">メールアドレス:</label>
+  <input type="email" th:field="*{email}" id="email"><br>
+
+  <label for="region">地域:</label>
+  <input type="text" th:field="*{region}" id="region"><br>
+
+  <label for="age">年齢:</label>
+  <input type="number" th:field="*{age}" id="age"><br>
+
+  <label for="gender">性別:</label>
+  <select th:field="*{gender}" id="gender">
+    <option value="男">男</option>
+    <option value="女">女</option>
+    <option value="その他">その他</option>
+  </select><br>
+
+  <label for="remark">備考:</label>
+  <textarea th:field="*{remark}" id="remark"></textarea><br>
+
+  <button type="submit">更新</button>
+</form>
+</body>
+</html>

@@ -14,15 +14,15 @@
   </div>
   <div>
     <label>カナ:</label>
-    <input type="text" th:field="*{student.kanaName}"/>
+    <input type="text" th:field="*{student.kanaName}" required/>
   </div>
   <div>
     <label>ニックネーム:</label>
-    <input type="text" th:field="*{student.nickname}"/>
+    <input type="text" th:field="*{student.nickname}" required/>
   </div>
   <div>
     <label>住んでいる地域:</label>
-    <input type="text" th:field="*{student.region}"/>
+    <input type="text" th:field="*{student.region}" required/>
   </div>
   <div>
     <label>性別:</label>
@@ -38,7 +38,7 @@
   </div>
   <div>
     <label>メールアドレス:</label>
-    <input type="email" th:field="*{student.email}"/>
+    <input type="email" th:field="*{student.email}" required/>
   </div>
   <div>
     <label>備考:</label>
@@ -47,6 +47,12 @@
   <div>
     <label>削除フラグ:</label>
     <input type="checkbox" th:field="*{student.deleted}"/>
+  </div>
+  <div th:each="course, stat : *{studentsCourses}">
+    <label for="courseName"
+           th:for="studentCourse.__${stat.index}__.courseName">受講コース名: </label>
+    <input type="text" id="courseName" th:id="studentCourse.__${stat.index}__.courseName"
+           th:field="*{studentsCourses[__${stat.index}__].courseName}"/>
   </div>
   <div>
     <button type="submit">登録</button>
