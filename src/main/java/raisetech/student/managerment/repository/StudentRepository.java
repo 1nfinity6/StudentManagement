@@ -29,8 +29,21 @@ public interface StudentRepository {
         INSERT INTO students (name, kanaName, nickname, region, gender, age, email, remark, deleted) 
         VALUES (#{name}, #{kanaName}, #{nickname}, #{region}, #{gender}, #{age}, #{email}, #{remark}, #{isDeleted})
       """)
+
+  @Select("SELECT * FROM students WHERE id = #{id}")
+  Student findById(Long id);
+
+  @Insert(
+      "INSERT INTO students (name, kanaName, nickname, region, gender, age, email, remark, deleted) "
+          + "VALUES (#{name}, #{kanaName}, #{nickname}, #{region}, #{gender}, #{age}, #{email}, #{remark}, #{isDeleted})")
+
   @Options(useGeneratedKeys = true, keyProperty = "id")
   void insertStudent(Student student);
+
+  @Insert("INSERT INTO students_courses (course_name, course_start_at, course_end_at, student_id) "
+      + "VALUES(#{courseName}, #{courseStartAt}, #{courseEndAt}, #{studentId})")
+  @Options(useGeneratedKeys = true, keyProperty = "id")
+  void registerStudentCourses(StudentsCourses studentscourses);
 
   @Update("""
         UPDATE students 
@@ -40,7 +53,7 @@ public interface StudentRepository {
       """)
   void updateStudent(Student student);
 
-  @Insert("INSERT INTO students_courses (course_name, student_id) VALUES (#{courseName}, #{studentId})")
+　@Insert("INSERT INTO students_courses (course_name, student_id) VALUES (#{courseName}, #{studentId})")
   void insertStudentCourse(StudentsCourses course);
 
   @Update("""

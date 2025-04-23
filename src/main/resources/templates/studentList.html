@@ -13,7 +13,6 @@
     <th>カナ名</th>
     <th>ニックネーム</th>
     <th>メールアドレス</th>
-    　
     <th>地域</th>
     <th>年齢</th>
     <th>性別</th>
@@ -27,9 +26,12 @@
       <a th:href="@{/students/edit/{id}(id=${studentDetail.student.id})}"
          th:text="${studentDetail.student.name}">名前</a>
     </td>
-    <td th:text="${studentDetail.student.kanaName}">ヤマダタロウ</td>
+　　 <td th:text="${studentDetail.student.kanaName}">ヤマダタロウ</td>
     <td th:text="${studentDetail.student.nickname}">タロー</td>
     <td th:text="${studentDetail.student.email}">taro@example.com</td>
+    <td th:text="${studentDetail.student.kanaName}">サトウトモミ</td>
+    <td th:text="${studentDetail.student.nickname}">ともみ</td>
+    <td th:text="${studentDetail.student.email}">tomomi@example.com</td>
     <td th:text="${studentDetail.student.region}">埼玉県川口市</td>
     <td th:text="${studentDetail.student.age}">35</td>
     <td th:text="${studentDetail.student.gender}">男</td>
