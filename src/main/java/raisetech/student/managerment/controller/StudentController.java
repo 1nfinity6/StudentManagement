@@ -37,17 +37,26 @@ public class StudentController {
     return "studentList";
   }
 
-  @GetMapping("/studentsCourseList")
-  public List<StudentsCourses> getStudentsCoursesList() {
-    return service.searchStudentsCoursesList();
-  }
-
   @GetMapping("/newStudent")
   public String newStudent(Model model) {
     StudentDetail studentDetail = new StudentDetail();
     studentDetail.setStudent(new Student());
     model.addAttribute("studentDetail", studentDetail);
     return "registerStudent";
+  }
+
+  @GetMapping("/students/edit/{id}")
+  public String showEditForm(@org.springframework.web.bind.annotation.PathVariable Long id,
+      Model model) {
+    Student student = service.findById(id);
+    List<StudentsCourses> courses = service.findCoursesByStudentId(id);
+
+    StudentDetail studentDetail = new StudentDetail();
+    studentDetail.setStudent(student);
+    studentDetail.setStudentsCourses(courses);
+
+    model.addAttribute("studentDetail", studentDetail);
+    return "editStudent";
   }
 
   @PostMapping("/registerStudent")
@@ -67,8 +76,9 @@ public class StudentController {
     if (result.hasErrors()) {
       return "editStudent";
     }
-
+    System.out.println("Updating student with ID: " + studentDetail.getStudent().getId());
     service.updateStudentDetail(studentDetail);
     return "redirect:/studentList";
   }
 }
+

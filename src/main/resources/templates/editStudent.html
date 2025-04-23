@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>受講生詳細</title>
+</head>
+<body>
+<h1>受講生詳細</h1>
+<form th:action="@{/updateStudent}" th:object="${studentDetail}" method="post">
+  <input type="hidden" th:field="*{student.id}"/>
+
+  <div>
+    <label for="name">名前:</label>
+    <input type="text" id="name" th:field="*{student.name}" required/>
+  </div>
+  <div>
+    <label>カナ:</label>
+    <input type="text" th:field="*{student.kanaName}"/>
+  </div>
+  <div>
+    <label>ニックネーム:</label>
+    <input type="text" th:field="*{student.nickname}"/>
+  </div>
+  <div>
+    <label>住んでいる地域:</label>
+    <input type="text" th:field="*{student.region}"/>
+  </div>
+  <div>
+    <label>性別:</label>
+    <select th:field="*{student.gender}">
+      <option value="男">男</option>
+      <option value="女">女</option>
+      <option value="その他">その他</option>
+    </select>
+  </div>
+  <div>
+    <label>年齢:</label>
+    <input type="number" th:field="*{student.age}"/>
+  </div>
+  <div>
+    <label>メールアドレス:</label>
+    <input type="email" th:field="*{student.email}"/>
+  </div>
+  <div>
+    <label>備考:</label>
+    <textarea th:field="*{student.remark}"></textarea>
+  </div>
+  <div>
+    <label>削除フラグ:</label>
+    <input type="checkbox" th:field="*{student.deleted}"/>
+  </div>
+  <div th:each="course, iterStat : *{studentsCourses}">
+    <div>
+      <label>受講コースID:</label>
+      <input type="text" th:field="*{studentsCourses[__${iterStat.index}__].id}"/>
+    </div>
+    <div>
+      <label>受講コース名:</label>
+      <input type="text" th:field="*{studentsCourses[__${iterStat.index}__].courseName}"/>
+      <input type="hidden" th:field="*{studentsCourses[__${iterStat.index}__].studentId}"/>
+    </div>
+  </div>
+  <button type="submit">更新</button>
+</form>
+</body>
+</html>
