@@ -2,7 +2,7 @@ package raisetech.student.managerment.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,11 +22,28 @@ public class StudentService {
   }
 
   public List<Student> searchStudentList() {
-    return repository.search();
+    return repository.search();  // repository.search() メソッドを呼び出す
+  }
+
+  public StudentDetail searchStudent(String id) {
+    Student student = repository.findStudentById(Long.parseLong(id));  // findById を使用
+    if (student != null) {
+      List<StudentsCourses> studentsCourses = repository.searchStudentsCourses(student.getId());
+      StudentDetail studentDetail = new StudentDetail();
+      studentDetail.setStudent(student);
+      studentDetail.setStudentsCourses(studentsCourses);
+      return studentDetail;
+    } else {
+      return null;
+    }
+  }
+
+  public List<StudentsCourses> findCoursesByStudentId(Long studentId) {
+    return repository.searchStudentsCourses(studentId);
   }
 
   public List<StudentsCourses> searchStudentsCoursesList() {
-    return repository.searchStudentsCourses();
+    return repository.searchStudentsCoursesList();
   }
 
   @Transactional
@@ -42,22 +59,29 @@ public class StudentService {
     }
   }
 
-  public void save(Student student) {
-    repository.insertStudent(student);
-  }
-
   public void updateStudentDetail(StudentDetail studentDetail) {
     Student student = studentDetail.getStudent();
-
-    if ("MALE".equals(student.getGender())) {
-      student.setGender("男");
-    } else if ("FEMALE".equals(student.getGender())) {
-      student.setGender("女");
-    } else {
-      student.setGender("その他");
-    }
-
     repository.updateStudent(student);
+    List<StudentsCourses> courses = studentDetail.getStudentsCourses();
+    for (StudentsCourses course : courses) {
+      if (course.getId() != null && !course.getId().isEmpty()) {
+        System.out.println("Updating course with ID: " + course.getId() + " to course name: "
+            + course.getCourseName() + " and studentId: " + course.getStudentId());
+        repository.updateStudentCourse(course);
+      }
+    }
+  }
+
+  public void save(Student student) {
+    if (student.getId() == null) {
+      repository.insertStudent(student);
+    } else {
+      repository.updateStudent(student);
+    }
+  }
+
+  public Student findById(Long id) {
+    return repository.findStudentById(id);
   }
 
   public Student findById(Long id) {
