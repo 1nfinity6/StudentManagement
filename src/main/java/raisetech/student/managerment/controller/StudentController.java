@@ -4,19 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import raisetech.student.managerment.controller.converter.StudentConverter;
 import raisetech.student.managerment.data.Student;
 import raisetech.student.managerment.data.StudentsCourses;
 import raisetech.student.managerment.domain.StudentDetail;
 import raisetech.student.managerment.service.StudentService;
 
-@Controller
+@RestController
 public class StudentController {
 
   private final StudentService service;
@@ -30,11 +33,10 @@ public class StudentController {
   }
 
   @GetMapping("/studentList")
-  public String getStudentList(Model model) {
+  public List<StudentDetail> getStudentList() {
     List<Student> students = service.searchStudentList();
     List<StudentsCourses> studentsCourses = service.searchStudentsCoursesList();
-    model.addAttribute("studentList", converter.convertStudentDetails(students, studentsCourses));
-    return "studentList";
+    return converter.convertStudentDetails(students, studentsCourses);
   }
 
   @GetMapping("/studentsCourseList")
@@ -56,19 +58,13 @@ public class StudentController {
     if (result.hasErrors()) {
       return "registerStudent";
     }
-
     service.registerStudentDetail(studentDetail);
     return "redirect:/studentList";
   }
 
   @PostMapping("/updateStudent")
-  public String updateStudent(@ModelAttribute StudentDetail studentDetail,
-      BindingResult result, Model model) {
-    if (result.hasErrors()) {
-      return "editStudent";
-    }
-
+  public ResponseEntity<String> updateStudent(@RequestBody StudentDetail studentDetail) {
     service.updateStudentDetail(studentDetail);
-    return "redirect:/studentList";
+    return ResponseEntity.ok("更新処理が成功しました。");
   }
 }
