@@ -38,7 +38,6 @@ public class StudentController {
     List<StudentsCourses> studentsCourses = service.searchStudentsCoursesList();
     return converter.convertStudentDetails(students, studentsCourses);
   }
-
   @GetMapping("/studentsCourseList")
   public List<StudentsCourses> getStudentsCoursesList() {
     return service.searchStudentsCoursesList();
@@ -48,9 +47,11 @@ public class StudentController {
   public String newStudent(Model model) {
     StudentDetail studentDetail = new StudentDetail();
     studentDetail.setStudent(new Student());
+    studentDetail.setStudentsCourses(Arrays.asList(new StudentsCourses()));
     model.addAttribute("studentDetail", studentDetail);
     return "registerStudent";
   }
+
 
   @PostMapping("/registerStudent")
   public String registerStudent(@ModelAttribute StudentDetail studentDetail,
@@ -64,7 +65,8 @@ public class StudentController {
 
   @PostMapping("/updateStudent")
   public ResponseEntity<String> updateStudent(@RequestBody StudentDetail studentDetail) {
-    service.updateStudentDetail(studentDetail);
+ service.updateStudentDetail(studentDetail);
     return ResponseEntity.ok("更新処理が成功しました。");
   }
 }
+
