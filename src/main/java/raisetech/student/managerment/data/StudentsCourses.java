@@ -12,8 +12,15 @@ public class StudentsCourses {
 
   private String id;
   private String courseName;
-  private LocalDateTime courseStartAt;
-  private LocalDateTime courseEndAt;
+  private LocalDateTime endDate;
+  private LocalDateTime startDate;
   private String studentId;
 
+  public void setCourseEndAt(LocalDateTime endDate) {
+    this.endDate = endDate;
+  }
+
+  public void setCourseStartAt(LocalDateTime startDate) {
+    this.startDate = startDate;
+  }
 }
