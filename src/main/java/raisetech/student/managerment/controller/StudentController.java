@@ -1,24 +1,25 @@
 package raisetech.student.managerment.controller;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import raisetech.student.managerment.controller.converter.StudentConverter;
 import raisetech.student.managerment.data.Student;
 import raisetech.student.managerment.data.StudentsCourses;
 import raisetech.student.managerment.domain.StudentDetail;
 import raisetech.student.managerment.service.StudentService;
 
-@Controller
+@RestController
 public class StudentController {
 
   private final StudentService service;
@@ -32,11 +33,14 @@ public class StudentController {
   }
 
   @GetMapping("/studentList")
-  public String getStudentList(Model model) {
+  public List<StudentDetail> getStudentList() {
     List<Student> students = service.searchStudentList();
     List<StudentsCourses> studentsCourses = service.searchStudentsCoursesList();
-    model.addAttribute("studentList", converter.convertStudentDetails(students, studentsCourses));
-    return "studentList";
+    return converter.convertStudentDetails(students, studentsCourses);
+  }
+  @GetMapping("/studentsCourseList")
+  public List<StudentsCourses> getStudentsCoursesList() {
+    return service.searchStudentsCoursesList();
   }
 
   @GetMapping("/newStudent")
@@ -48,25 +52,6 @@ public class StudentController {
     return "registerStudent";
   }
 
-  @GetMapping("/students/edit/{id}")
-
-  public String showEditForm(@org.springframework.web.bind.annotation.PathVariable Long id,
-      Model model) {
-    Student student = service.findById(id);
-    List<StudentsCourses> courses = service.findCoursesByStudentId(id);
-
-    StudentDetail studentDetail = new StudentDetail();
-    studentDetail.setStudent(student);
-    studentDetail.setStudentsCourses(courses);
-
-    model.addAttribute("studentDetail", studentDetail);
-
-  public String showEditForm(@PathVariable Long id, Model model) {
-    Student student = service.findById(id);
-    model.addAttribute("student", student);
-
-    return "editStudent";
-  }
 
   @PostMapping("/registerStudent")
   public String registerStudent(@ModelAttribute StudentDetail studentDetail,
@@ -74,20 +59,14 @@ public class StudentController {
     if (result.hasErrors()) {
       return "registerStudent";
     }
-
     service.registerStudentDetail(studentDetail);
     return "redirect:/studentList";
   }
 
   @PostMapping("/updateStudent")
-  public String updateStudentDetail(@ModelAttribute StudentDetail studentDetail,
-      BindingResult result, Model model) {
-    if (result.hasErrors()) {
-      return "editStudent";
-    }
-    System.out.println("Updating student with ID: " + studentDetail.getStudent().getId());
-    service.updateStudentDetail(studentDetail);
-    return "redirect:/studentList";
+  public ResponseEntity<String> updateStudent(@RequestBody StudentDetail studentDetail) {
+ service.updateStudentDetail(studentDetail);
+    return ResponseEntity.ok("更新処理が成功しました。");
   }
 }
 
