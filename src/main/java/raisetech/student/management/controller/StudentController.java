@@ -3,7 +3,9 @@ package raisetech.student.management.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +52,7 @@ public class StudentController {
    */
   @GetMapping("/student/{id}")
   public StudentDetail getStudent(
-      @PathVariable @Min(1) @Max(3) @NotNull(message = "IDは必須です。") Long id) {
+      @PathVariable @NotBlank @Pattern(regexp = "^\\d+$") Long id) {
     return service.searchStudent(id);
   }
 
@@ -62,7 +64,7 @@ public class StudentController {
    */
   @PostMapping("/registerStudent")
   public ResponseEntity<StudentDetail> registerStudent(
-      @RequestBody @Valid @NotNull(message = "受講生の情報は必須です。") StudentDetail studentDetail) {
+      @RequestBody @Valid StudentDetail studentDetail) {
     StudentDetail responseStudentDetail = service.registerStudent(studentDetail);
     return ResponseEntity.ok(responseStudentDetail);
   }
@@ -75,7 +77,7 @@ public class StudentController {
    */
   @PutMapping("/updateStudent")
   public ResponseEntity<String> updateStudent(
-      @RequestBody @Valid @NotNull(message = "受講生の情報は必須です。") StudentDetail studentDetail) {
+      @RequestBody @Valid StudentDetail studentDetail) {
     service.updateStudent(studentDetail);
     return ResponseEntity.ok("更新処理が成功しました。");
   }
