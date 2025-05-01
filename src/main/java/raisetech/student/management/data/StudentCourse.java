@@ -1,20 +1,19 @@
-package raisetech.student.managerment.data;
+package raisetech.student.management.data;
 
 import java.time.LocalDateTime;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 
-public class StudentsCourses {
+public class StudentCourse {
 
   private String id;
   private String courseName;
   private LocalDateTime endDate;
   private LocalDateTime startDate;
-  private String studentId;
+  private Long studentId;
 
   public void setCourseEndAt(LocalDateTime endDate) {
     this.endDate = endDate;

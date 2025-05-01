@@ -1,5 +1,6 @@
-package raisetech.student.managerment.data;
+package raisetech.student.management.data;
 
+import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.Setter;
 
