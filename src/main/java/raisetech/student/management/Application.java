@@ -1,4 +1,4 @@
-package raisetech.student.managerment;
+package raisetech.student.management;
 
 
 import org.springframework.boot.SpringApplication;

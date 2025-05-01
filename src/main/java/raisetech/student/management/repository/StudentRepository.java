@@ -1,4 +1,4 @@
-package raisetech.student.managerment.repository;
+package raisetech.student.management.repository;
 
 import java.util.List;
 import org.apache.ibatis.annotations.Insert;
@@ -6,8 +6,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
-import raisetech.student.managerment.data.Student;
-import raisetech.student.managerment.data.StudentCourse;
+import raisetech.student.management.data.Student;
+import raisetech.student.management.data.StudentCourse;
 
 /**
  * 受講生テーブルと受講生コース情報テーブルと紐づくRepositoryです。
@@ -21,7 +21,7 @@ public interface StudentRepository {
    *
    * @return 受講生一覧（全件）
    */
-  @Select("SELECT * FROM students")
+
   List<Student> search();
 
   /**
@@ -30,7 +30,7 @@ public interface StudentRepository {
    * @param id 　受講生ID
    * @return 受講生
    */
-  @Select("SELECT * FROM students WHERE id = #{id}")
+
   Student searchStudent(String id);
 
   /**
