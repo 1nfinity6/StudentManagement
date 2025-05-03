@@ -57,7 +57,6 @@ public class StudentService {
     return new StudentDetail(student, studentsCourse);
   }
 
-
   /**
    * 受講生詳細の登録を行います。 受講生と受講生コース情報を個別に登録し、受講生コース情報には受講生情報を紐づける値とコース開始日、コース終了日
    *
