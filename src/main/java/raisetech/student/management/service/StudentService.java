@@ -9,7 +9,7 @@ import raisetech.student.management.controller.converter.StudentConverter;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
-import raisetech.student.management.exception.StudentNotFoundException;
+//import raisetech.student.management.exception.StudentNotFoundException;
 import raisetech.student.management.repository.StudentRepository;
 
 /**
@@ -44,22 +44,17 @@ public class StudentService {
    * @param id 　受講生ID
    * @return 受講生詳細
    */
-  public StudentDetail searchStudent(Long id) {
-    try {
-      Student student = repository.searchStudent(id);
-      System.out.println("検索された student = " + student);
+  public StudentDetail searchStudent(String id) {
 
-      if (student == null) {
-        System.out.println("student is null");
-        throw new StudentNotFoundException("ID " + id + " の受講生は見つかりませんでした。");
-      }
+    Student student = repository.searchStudent(id);
+    System.out.println("検索された student = " + student);
 
-      List<StudentCourse> studentsCourse = repository.searchStudentCourse(student.getId());
-      return new StudentDetail(student, studentsCourse);
-    } catch (Exception e) {
-      e.printStackTrace();  // ★ 例外の詳細を標準出力に出す
-      throw e;  // 例外をスローして例外ハンドラで処理させる
-    }
+    //if (student == null) {
+    //System.out.println("student is null");
+    //throw new StudentNotFoundException("ID " + id + " の受講生は見つかりませんでした。");
+    //}
+    List<StudentCourse> studentsCourse = repository.searchStudentCourse(student.getId());
+    return new StudentDetail(student, studentsCourse);
   }
 
 
@@ -91,8 +86,8 @@ public class StudentService {
     LocalDateTime now = LocalDateTime.now();
 
     studentCourse.setStudentId(student.getId());
-    studentCourse.setCourseStartAt(now);
-    studentCourse.setCourseEndAt(now.plusYears(1));
+    studentCourse.setStartDate(now);
+    studentCourse.setEndDate(now.plusYears(1));
   }
 
   /**
