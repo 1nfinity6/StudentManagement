@@ -57,8 +57,8 @@ public class StudentService {
       List<StudentCourse> studentsCourse = repository.searchStudentCourse(student.getId());
       return new StudentDetail(student, studentsCourse);
     } catch (Exception e) {
-      e.printStackTrace();  // ★ 例外の詳細を標準出力に出す
-      throw e;  // 例外をスローして例外ハンドラで処理させる
+      e.printStackTrace();
+      throw e;
     }
   }
 
