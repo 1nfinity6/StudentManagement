@@ -9,7 +9,8 @@ import raisetech.student.management.controller.converter.StudentConverter;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
-//import raisetech.student.management.exception.StudentNotFoundException;
+import raisetech.student.management.exception.StudentNotFoundException;
+import raisetech.student.management.exception.StudentNotFoundException;
 import raisetech.student.management.repository.StudentRepository;
 
 /**
@@ -49,14 +50,13 @@ public class StudentService {
     Student student = repository.searchStudent(id);
     System.out.println("検索された student = " + student);
 
-    //if (student == null) {
-    //System.out.println("student is null");
-    //throw new StudentNotFoundException("ID " + id + " の受講生は見つかりませんでした。");
-    //}
+    if (student == null) {
+      System.out.println("student is null");
+      throw new StudentNotFoundException("ID " + id + " の受講生は見つかりませんでした。");
+    }
     List<StudentCourse> studentsCourse = repository.searchStudentCourse(student.getId());
     return new StudentDetail(student, studentsCourse);
   }
-
 
   /**
    * 受講生詳細の登録を行います。 受講生と受講生コース情報を個別に登録し、受講生コース情報には受講生情報を紐づける値とコース開始日、コース終了日
