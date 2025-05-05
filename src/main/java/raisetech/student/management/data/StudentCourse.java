@@ -11,7 +11,6 @@ import lombok.Setter;
 
 public class StudentCourse {
 
-
   private String id;
 
   @Schema(description = "コース名", example = "Javaベーシック")
@@ -24,5 +23,4 @@ public class StudentCourse {
   private LocalDateTime startDate;
 
   private String studentId;
-
 }
