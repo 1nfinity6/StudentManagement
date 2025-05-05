@@ -9,8 +9,6 @@ import raisetech.student.management.controller.converter.StudentConverter;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
-import raisetech.student.management.exception.StudentNotFoundException;
-import raisetech.student.management.exception.StudentNotFoundException;
 import raisetech.student.management.repository.StudentRepository;
 
 /**
@@ -46,14 +44,7 @@ public class StudentService {
    * @return 受講生詳細
    */
   public StudentDetail searchStudent(String id) {
-
     Student student = repository.searchStudent(id);
-    System.out.println("検索された student = " + student);
-
-    if (student == null) {
-      System.out.println("student is null");
-      throw new StudentNotFoundException("ID " + id + " の受講生は見つかりませんでした。");
-    }
     List<StudentCourse> studentsCourse = repository.searchStudentCourse(student.getId());
     return new StudentDetail(student, studentsCourse);
   }
