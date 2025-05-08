@@ -4,8 +4,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,7 +39,7 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生詳細の一覧検索_リポジトリとコンバーターの処理が適切に呼び出せていること() {
+  void 受講生詳細の検索_リポジトリとコンバーターの処理が適切に呼び出せていること() {
     List<Student> studentList = new ArrayList<>();
     List<StudentCourse> studentCourseList = new ArrayList<>();
     when(repository.search()).thenReturn(studentList);
@@ -51,65 +53,60 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生の詳細検索_指定IDで受講生と受講生コース情報が取得できること() {
+  void 受講生詳細の検索_リポジトリの処理が適切に呼び出せていること() {
+    String id = "999";
     Student student = new Student();
-    student.setId("1");
-    student.setName("田中");
+    student.setId(id);
+    when(repository.searchStudent(id)).thenReturn(student);
+    when(repository.searchStudentCourse(id)).thenReturn(new ArrayList<>());
 
-    StudentCourse course = new StudentCourse();
-    course.setCourseName("Javaベーシック");
+    StudentDetail expected = new StudentDetail(student, new ArrayList<>());
 
-    when(repository.searchStudent("1")).thenReturn(student);
-    when(repository.searchStudentCourse("1")).thenReturn(List.of(course));
+    StudentDetail actual = sut.searchStudent(id);
 
-    StudentDetail result = sut.searchStudent("1");
-
-    assertEquals("田中", result.getStudent().getName());
-    assertEquals(1, result.getStudentCourseList().size());
-    assertEquals("Javaベーシック", result.getStudentCourseList().get(0).getCourseName());
-  }
-
-
-  @Test
-  void 受講生情報と受講正コース情報を登録_受講生とその受講コースの登録処理が正しく行われているか() {
-    Student student = new Student();
-    student.setId("1");
-    student.setName("佐藤");
-
-    StudentCourse course = new StudentCourse();
-    course.setCourseName("Javaベーシック");
-
-    StudentDetail detail = new StudentDetail(student, List.of(course));
-
-    doNothing().when(repository).registerStudent(any());
-    doNothing().when(repository).registerStudentCourse(any());
-
-    StudentDetail result = sut.registerStudent(detail);
-
-    assertEquals("佐藤", result.getStudent().getName());
-    verify(repository).registerStudent(student);
-    verify(repository).registerStudentCourse(any());
+    verify(repository, times(1)).searchStudent(id);
+    verify(repository, times(1)).searchStudentCourse(id);
+    Assertions.assertEquals(expected.getStudent().getId(), actual.getStudent().getId());
   }
 
   @Test
-  void 受講生情報と受講生コース情報の更新_性別がMALEのとき日本語に変換されて保存されること() {
+  void 受講生詳細の登録_とリポジトリの処理が適切に呼び出されていること() {
     Student student = new Student();
-    student.setId("1");
-    student.setGender("MALE");
+    StudentCourse studentCourse = new StudentCourse();
+    List<StudentCourse> studentCourseList = new ArrayList<>(List.of(studentCourse));
+    StudentDetail studentDetail = new StudentDetail(student, studentCourseList);
 
-    StudentCourse course = new StudentCourse();
-    course.setCourseName("Javaベーシック");
+    sut.registerStudent(studentDetail);
 
-    StudentDetail detail = new StudentDetail(student, List.of(course));
+    verify(repository, times(1)).registerStudent(student);
+    verify(repository, times(1)).registerStudentCourse(studentCourse);
+  }
 
-    doNothing().when(repository).updateStudent(any());
-    doNothing().when(repository).updateStudentCourse(any());
+  @Test
+  void 受講生詳細の登録_初期化処理が行われていること() {
+    String id = "999";
+    Student student = new Student();
+    student.setId(id);
+    StudentCourse studentCourse = new StudentCourse();
 
-    sut.updateStudent(detail);
+    sut.initStudentsCourse(studentCourse, student.getId());
 
-    assertEquals("男", student.getGender());
+    assertEquals(id, studentCourse.getStudentId());
+    assertEquals(LocalDateTime.now().getHour(), studentCourse.getStartDate().getHour());
+    assertEquals(LocalDateTime.now().plusYears(1).getYear(),
+        studentCourse.getEndDate().getYear());
+  }
 
-    verify(repository).updateStudent(student);
-    verify(repository).updateStudentCourse(course);
+  @Test
+  void 受講生詳細の更新_リポジトリの処理が適切に呼び出されていること() {
+    Student student = new Student();
+    StudentCourse studentCourse = new StudentCourse();
+    List<StudentCourse> studentCourseList = new ArrayList<>(List.of(studentCourse));
+    StudentDetail studentDetail = new StudentDetail(student, studentCourseList);
+
+    sut.updateStudent(studentDetail);
+
+    verify(repository, times(1)).updateStudent(studentDetail.getStudent());
+    verify(repository, times(1)).updateStudentCourse(studentCourse);
   }
 }
