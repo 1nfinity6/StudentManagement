@@ -61,7 +61,7 @@ public class StudentService {
 
     repository.registerStudent(student);
     studentDetail.getStudentCourseList().forEach(studentsCourse -> {
-      initStudentsCourse(studentsCourse, student);
+      initStudentsCourse(studentsCourse, student.getId());
       repository.registerStudentCourse(studentsCourse);
     });
     return studentDetail;
@@ -73,10 +73,10 @@ public class StudentService {
    * @param studentCourse 受講生コース情報
    * @param student       受講生
    */
-  private void initStudentsCourse(StudentCourse studentCourse, Student student) {
+  void initStudentsCourse(StudentCourse studentCourse, String id) {
     LocalDateTime now = LocalDateTime.now();
 
-    studentCourse.setStudentId(student.getId());
+    studentCourse.setStudentId(id);
     studentCourse.setStartDate(now);
     studentCourse.setEndDate(now.plusYears(1));
   }
@@ -88,17 +88,7 @@ public class StudentService {
    */
   @Transactional
   public void updateStudent(StudentDetail studentDetail) {
-    Student student = studentDetail.getStudent();
-
-    String gender = student.getGender();
-    switch (gender) {
-      case "MALE" -> student.setGender("男");
-      case "FEMALE" -> student.setGender("女");
-      default -> student.setGender("その他");
-    }
-
-    repository.updateStudent(student);
-
+    repository.updateStudent(studentDetail.getStudent());
     studentDetail.getStudentCourseList()
         .forEach(studentCourse -> repository.updateStudentCourse(studentCourse));
   }
