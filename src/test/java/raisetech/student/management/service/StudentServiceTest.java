@@ -19,7 +19,6 @@ import raisetech.student.management.data.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
 import raisetech.student.management.repository.StudentRepository;
 
-import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
