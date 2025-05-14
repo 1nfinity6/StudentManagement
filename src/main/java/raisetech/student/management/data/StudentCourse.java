@@ -1,6 +1,7 @@
 package raisetech.student.management.data;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,14 +18,15 @@ public class StudentCourse {
 
   private String id;
 
-  @Schema(description = "コース名", example = "Javaベーシック")
+  @NotNull(message = "コース名は必須です。")
   private String courseName;
 
-  @Schema(description = "コース開始日", example = "2024-04-01T00:00:00")
+  @NotNull(message = "修了予定日は必須です。")
   private LocalDateTime endDate;
 
-  @Schema(description = "コース終了日", example = "2025-04-01T00:00:00")
+  @NotNull(message = "受講開始日は必須です。")
   private LocalDateTime startDate;
 
+  @NotNull(message = "受講生IDは必須です。")
   private String studentId;
 }
