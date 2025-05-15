@@ -22,17 +22,7 @@ class StudentConverterTest {
 
   @Test
   void 受講生のリストと受講生コース情報のリストを渡して受講生詳細リストが作成できること() {
-    Student student = new Student();
-    student.setId("1");
-    student.setName("江並公史");
-    student.setKanaName("エナミコウジ");
-    student.setNickname("こうじ");
-    student.setRegion("奈良県奈良市");
-    student.setGender("男");
-    student.setAge(36);
-    student.setEmail("koji@example.com");
-    student.setRemark("");
-    student.setDeleted(false);
+    Student student = createStudent();
 
     StudentCourse studentCourse = new StudentCourse();
     studentCourse.setId("1");
@@ -46,24 +36,14 @@ class StudentConverterTest {
 
     List<StudentDetail> actual = sut.convertStudentDetails(studentList, studentCourseList);
 
-    assertThat(actual.get(0).getStudentCourseList()).hasSize(1);
-    assertThat(actual.get(0).getStudentCourseList().get(0).getCourseName()).isEqualTo(
-        "Javaベーシック");
+    assertThat(actual.get(0).getStudent()).isEqualTo(student);
+    assertThat(actual.get(0).getStudentCourseList()).isEqualTo(studentCourseList);
   }
+
 
   @Test
   void 受講生リストと受講生コース情報リストを渡した時に紐づかない受講生コース情報は除外されること() {
-    Student student = new Student();
-    student.setId("1");
-    student.setName("江並公史");
-    student.setKanaName("エナミコウジ");
-    student.setNickname("こうじ");
-    student.setRegion("奈良県奈良市");
-    student.setGender("男");
-    student.setAge(36);
-    student.setEmail("koji@example.com");
-    student.setRemark("");
-    student.setDeleted(false);
+    Student student = createStudent();
 
     StudentCourse studentCourse = new StudentCourse();
     studentCourse.setId("1");
@@ -79,5 +59,20 @@ class StudentConverterTest {
 
     assertThat(actual.get(0).getStudent()).isEqualTo(student);
     assertThat(actual.get(0).getStudentCourseList()).isEmpty();
+  }
+
+  private static Student createStudent() {
+    Student student = new Student();
+    student.setId("1");
+    student.setName("江並公史");
+    student.setKanaName("エナミコウジ");
+    student.setNickname("こうじ");
+    student.setRegion("奈良県奈良市");
+    student.setGender("男");
+    student.setAge(36);
+    student.setEmail("koji@example.com");
+    student.setRemark("");
+    student.setDeleted(false);
+    return student;
   }
 }
