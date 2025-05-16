@@ -23,10 +23,10 @@ public class StudentCourse {
   private String courseName;
 
   @NotNull(message = "修了予定日は必須です。")
-  private LocalDateTime endDate;
+  private LocalDateTime courseEndAt;
 
   @NotNull(message = "受講開始日は必須です。")
-  private LocalDateTime startDate;
+  private LocalDateTime courseStartAt;
 
   @NotNull(message = "受講生IDは必須です。")
   private String studentId;

@@ -27,8 +27,8 @@ class StudentConverterTest {
     StudentCourse studentCourse = new StudentCourse();
     studentCourse.setId("1");
     studentCourse.setCourseName("Javaベーシック");
-    studentCourse.setEndDate(LocalDateTime.now().plusYears(1));
-    studentCourse.setStartDate(LocalDateTime.now());
+    studentCourse.setCourseEndAt(LocalDateTime.now().plusYears(1));
+    studentCourse.setCourseStartAt(LocalDateTime.now());
     studentCourse.setStudentId("1");
 
     List<Student> studentList = List.of(student);
@@ -48,8 +48,8 @@ class StudentConverterTest {
     StudentCourse studentCourse = new StudentCourse();
     studentCourse.setId("1");
     studentCourse.setCourseName("Javaベーシック");
-    studentCourse.setEndDate(LocalDateTime.now().plusYears(1));
-    studentCourse.setStartDate(LocalDateTime.now());
+    studentCourse.setCourseEndAt(LocalDateTime.now().plusYears(1));
+    studentCourse.setCourseStartAt(LocalDateTime.now());
     studentCourse.setStudentId("2");
 
     List<Student> studentList = List.of(student);
