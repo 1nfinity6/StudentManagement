@@ -48,3 +48,5 @@ public class Student {
   private boolean isDeleted;
 
 }
+
+//課題３１
