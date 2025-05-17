@@ -62,6 +62,7 @@ class StudentConverterTest {
   }
 
   private static Student createStudent() {
+
     Student student = new Student();
     student.setId("1");
     student.setName("江並公史");
@@ -76,3 +77,4 @@ class StudentConverterTest {
     return student;
   }
 }
+
