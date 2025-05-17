@@ -90,9 +90,9 @@ class StudentServiceTest {
     sut.initStudentsCourse(studentCourse, student.getId());
 
     assertEquals(id, studentCourse.getStudentId());
-    assertEquals(LocalDateTime.now().getHour(), studentCourse.getStartDate().getHour());
+    assertEquals(LocalDateTime.now().getHour(), studentCourse.getCourseStartAt().getHour());
     assertEquals(LocalDateTime.now().plusYears(1).getYear(),
-        studentCourse.getEndDate().getYear());
+        studentCourse.getCourseEndAt().getYear());
   }
 
   @Test

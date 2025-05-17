@@ -24,13 +24,12 @@ class StudentConverterTest {
   void 受講生のリストと受講生コース情報のリストを渡して受講生詳細リストが作成できること() {
     Student student = createStudent();
 
-    StudentCourse studentCourse = new StudentCourse(
-        "1",
-        "Javaベーシック",
-        LocalDateTime.now().plusYears(1),
-        LocalDateTime.now(),
-        "1"
-    );
+    StudentCourse studentCourse = new StudentCourse();
+    studentCourse.setId("1");
+    studentCourse.setCourseName("Javaベーシック");
+    studentCourse.setCourseEndAt(LocalDateTime.now().plusYears(1));
+    studentCourse.setCourseStartAt(LocalDateTime.now());
+    studentCourse.setStudentId("1");
 
     List<Student> studentList = List.of(student);
     List<StudentCourse> studentCourseList = List.of(studentCourse);
@@ -41,17 +40,17 @@ class StudentConverterTest {
     assertThat(actual.get(0).getStudentCourseList()).isEqualTo(studentCourseList);
   }
 
+
   @Test
   void 受講生リストと受講生コース情報リストを渡した時に紐づかない受講生コース情報は除外されること() {
     Student student = createStudent();
 
-    StudentCourse studentCourse = new StudentCourse(
-        "1",
-        "Javaベーシック",
-        LocalDateTime.now().plusYears(1),
-        LocalDateTime.now(),
-        "2"
-    );
+    StudentCourse studentCourse = new StudentCourse();
+    studentCourse.setId("1");
+    studentCourse.setCourseName("Javaベーシック");
+    studentCourse.setCourseEndAt(LocalDateTime.now().plusYears(1));
+    studentCourse.setCourseStartAt(LocalDateTime.now());
+    studentCourse.setStudentId("2");
 
     List<Student> studentList = List.of(student);
     List<StudentCourse> studentCourseList = List.of(studentCourse);
@@ -63,17 +62,19 @@ class StudentConverterTest {
   }
 
   private static Student createStudent() {
-    return new Student(
-        "1",
-        "江並公史",
-        "エナミコウジ",
-        "こうじ",
-        "奈良県奈良市",
-        "男",
-        36,
-        "koji@example.com",
-        "",
-        false
-    );
+
+    Student student = new Student();
+    student.setId("1");
+    student.setName("江並公史");
+    student.setKanaName("エナミコウジ");
+    student.setNickname("こうじ");
+    student.setRegion("奈良県奈良市");
+    student.setGender("男");
+    student.setAge(36);
+    student.setEmail("koji@example.com");
+    student.setRemark("");
+    student.setDeleted(false);
+    return student;
   }
 }
+

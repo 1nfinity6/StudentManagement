@@ -41,7 +41,7 @@
     INSERT INTO students_courses (
     course_name, student_id, course_start_at, course_end_at
     ) VALUES (
-    #{courseName}, #{studentId}, #{startDate}, #{endDate}
+    #{courseName}, #{studentId}, #{courseStartAt}, #{courseEndAt}
     )
   </insert>
 
