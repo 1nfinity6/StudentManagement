@@ -14,7 +14,8 @@
   </select>
 
   <!--受講生のコース情報の全件検索-->
-  <select id="searchStudentCourseList" resultType="raisetech.student.management.data.StudentCourse">
+  <select id="searchStudentCourseList"
+    resultType="raisetech.student.management.data.StudentCourse">
     SELECT * FROM students_courses
   </select>
 
