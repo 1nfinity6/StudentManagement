@@ -20,6 +20,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import raisetech.student.management.data.Student;
+
 import raisetech.student.management.repository.StudentRepository;
 import raisetech.student.management.service.StudentService;
 
@@ -84,6 +85,7 @@ class StudentControllerTest {
         .andExpect(status().isOk());
     verify(service, times(1)).registerStudent(any());
   }
+
 
   @Test
   void 受講生詳細の更新が実行できて空で返ってくること() throws Exception {
