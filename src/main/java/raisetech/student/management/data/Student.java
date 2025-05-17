@@ -5,7 +5,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -45,6 +47,31 @@ public class Student {
   private String email;
 
   private String remark;
-  private boolean isDeleted;
+  private boolean deleted;
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Student)) {
+      return false;
+    }
+    Student student = (Student) o;
+    return age == student.age &&
+        deleted == student.deleted &&
+        Objects.equals(name, student.name) &&
+        Objects.equals(kanaName, student.kanaName) &&
+        Objects.equals(nickname, student.nickname) &&
+        Objects.equals(region, student.region) &&
+        Objects.equals(gender, student.gender) &&
+        Objects.equals(email, student.email) &&
+        Objects.equals(remark, student.remark);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, kanaName, nickname, region, gender, age, email, remark, deleted);
+  }
 }
+
