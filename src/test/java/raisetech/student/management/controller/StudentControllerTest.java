@@ -2,8 +2,10 @@ package raisetech.student.management.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -12,6 +14,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +24,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import raisetech.student.management.data.Student;
-import raisetech.student.management.repository.StudentRepository;
+import raisetech.student.management.converter.StudentConverter;
+import raisetech.student.management.domain.StudentDetail;
+import raisetech.student.management.entity.Student;
+import raisetech.student.management.entity.StudentCourse;
+import raisetech.student.management.exception.StudentNotFoundException;
+import raisetech.student.management.repository.mybatis.StudentCourseMapper;
+import raisetech.student.management.repository.mybatis.StudentRepository;
 import raisetech.student.management.service.StudentService;
 
 @WebMvcTest(StudentController.class)
@@ -30,31 +40,78 @@ class StudentControllerTest {
   private MockMvc mockMvc;
 
   @MockBean
-  private StudentService service;
+  private StudentService studentService;
   @MockBean
-  private StudentRepository repository;
+  private StudentRepository studentRepository;
+  @MockBean
+  private StudentConverter studentConverter;
+  @MockBean
+  private StudentCourseMapper studentCourseMapper;
+
 
   private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
   @Test
   void 受講生詳細の一覧検索が実行できて空のリストが返ってくること() throws Exception {
+    when(studentService.searchStudentList()).thenReturn(Collections.emptyList());
     mockMvc.perform(get("/studentList"))
         .andExpect(status().isOk());
 
-    verify(service, times(1)).searchStudentList();
+    verify(studentService, times(1)).searchStudentList();
   }
 
   @Test
   void 受講生詳細の検索が実行できて空で返ってくること() throws Exception {
     String id = "999";
+
+    Student student = new Student();
+    student.setId("999");
+    student.setName("テスト 太郎");
+    student.setKanaName("テスト タロウ");
+    student.setNickname("テスト");
+    student.setRegion("東京都");
+    student.setGender("男");
+    student.setEmail("test@example.com");
+    student.setAge(30);
+    student.setDeleted(false);
+
+    StudentCourse course = new StudentCourse();
+    course.setId("1");
+    course.setCourseName("Javaスタンダード");
+    course.setStartAt(LocalDateTime.of(2024, 4, 1, 0, 0));
+    course.setEndAt(LocalDateTime.of(2024, 9, 1, 0, 0));
+    course.setStudentId("999");
+
+    StudentDetail detail = new StudentDetail();
+    detail.setStudent(student);
+    detail.setStudentCourseList(List.of(course));
+
+    when(studentService.searchStudent(id)).thenReturn(new StudentDetail());
     mockMvc.perform(get("/student/{id}", id))
         .andExpect(status().isOk());
 
-    verify(service, times(1)).searchStudent(id);
+    verify(studentService, times(1)).searchStudent(id);
+  }
+
+  @Test
+  void 存在しないIDで検索した場合に404が返ること() throws Exception {
+    String notFoundId = "404";
+
+    when(studentService.searchStudent(notFoundId))
+        .thenThrow(new StudentNotFoundException("Student not found"));
+
+    mockMvc.perform(get("/student/{id}", notFoundId))
+        .andExpect(status().isNotFound());
   }
 
   @Test
   void 受講生詳細の登録が実行できて空で返ってくること() throws Exception {
+
+    StudentDetail returnedDetail = new StudentDetail();
+    returnedDetail.setStudent(new Student());
+    returnedDetail.setStudentCourseList(List.of());
+
+    when(studentService.registerStudent(any())).thenReturn(new StudentDetail());
     mockMvc.perform(post("/registerStudent").contentType(MediaType.APPLICATION_JSON).content(
             """
                 {
@@ -73,20 +130,31 @@ class StudentControllerTest {
                     "studentCourseList" : [
                       {
                          "courseName" : "Javaスタンダード",
-                         "endDate":  "2024-09-01T00:00:00",
-                         "startDate":  "2024-04-01T00:00:00",
-                         "studentId": "1"
+                         "startAt": "2024-04-01T00:00:00",
+                         "endAt": "2024-09-01T00:00:00",
+                         "studentId": "1",
+                         "status": "仮申込"
                       }
                     ]
                  }
                 """
         ))
         .andExpect(status().isOk());
-    verify(service, times(1)).registerStudent(any());
+    verify(studentService, times(1)).registerStudent(any());
+  }
+
+  @Test
+  void 無効なJSONで登録した場合400が返ること() throws Exception {
+    mockMvc.perform(post("/registerStudent")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{}"))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
   void 受講生詳細の更新が実行できて空で返ってくること() throws Exception {
+    doNothing().when(studentService).updateStudent(any());
+
     mockMvc.perform(put("/updateStudent").contentType(MediaType.APPLICATION_JSON).content(
             """
                  {
@@ -106,8 +174,8 @@ class StudentControllerTest {
                        {
                           "id" : "15",
                           "courseName" : "Javaスタンダード",
-                          "endDate":  "2024-09-01T00:00:00",
-                          "startDate":  "2024-04-01T00:00:00",
+                          "startAt": "2024-04-01T00:00:00",
+                          "endAt": "2024-09-01T00:00:00",
                           "studentId": "1"
                        }
                      ]
@@ -116,7 +184,7 @@ class StudentControllerTest {
         ))
         .andExpect(status().isOk());
 
-    verify(service, times(1)).updateStudent(any());
+    verify(studentService, times(1)).updateStudent(any());
   }
 
   @Test

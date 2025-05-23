@@ -1,0 +1,28 @@
+<!DOCTYPE html><--入力フォーム-->
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>申込状況登録・変更</title>
+</head>
+<body>
+<h1>申込状況 登録・変更</h1>
+
+<form th:action="@{/status/save}" th:object="${statusRequest}" method="post">
+  <input type="hidden" th:field="*{courseId}"/>
+
+  <label for="status">申込状況:</label>
+  <select th:field="*{status}" id="status">
+    <option value="仮申込">仮申込</option>
+    <option value="本申込">本申込</option>
+    <option value="受講中">受講中</option>
+    <option value="受講修了">受講修了</option>
+  </select>
+
+  <br><br>
+  <button type="submit">保存</button>
+</form>
+
+<a th:href="@{/status/{courseId}(courseId=${courseId})}">戻る</a>
+
+</body>
+</html>

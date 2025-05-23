@@ -5,7 +5,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -14,11 +17,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import raisetech.student.management.controller.converter.StudentConverter;
-import raisetech.student.management.data.Student;
-import raisetech.student.management.data.StudentCourse;
+import raisetech.student.management.converter.StudentConverter;
 import raisetech.student.management.domain.StudentDetail;
-import raisetech.student.management.repository.StudentRepository;
+import raisetech.student.management.entity.Student;
+import raisetech.student.management.entity.StudentCourse;
+import raisetech.student.management.repository.mybatis.StudentRepository;
 
 @ExtendWith(MockitoExtension.class)
 class StudentServiceTest {
@@ -30,10 +33,12 @@ class StudentServiceTest {
   private StudentConverter converter;
 
   private StudentService sut;
+  private Clock fixedClock;
 
   @BeforeEach
   void before() {
-    sut = new StudentService(repository, converter);
+    fixedClock = Clock.fixed(Instant.parse("2024-01-01T10:00:00Z"), ZoneId.systemDefault());
+    sut = new StudentService(repository, converter, fixedClock);
   }
 
   @Test
@@ -48,6 +53,18 @@ class StudentServiceTest {
     verify(repository, times(1)).search();
     verify(repository, times(1)).searchStudentCourseList();
     verify(converter, times(1)).convertStudentDetails(studentList, studentCourseList);
+  }
+
+  @Test
+  void 受講生詳細の検索_空リストが返るときでもエラーなく動作すること() {
+    when(repository.search()).thenReturn(new ArrayList<>());
+    when(repository.searchStudentCourseList()).thenReturn(new ArrayList<>());
+    when(converter.convertStudentDetails(new ArrayList<>(), new ArrayList<>()))
+        .thenReturn(new ArrayList<>());
+
+    List<StudentDetail> result = sut.searchStudentList();
+
+    assertEquals(0, result.size());
   }
 
   @Test
@@ -89,10 +106,12 @@ class StudentServiceTest {
 
     sut.initStudentsCourse(studentCourse, student.getId());
 
+    LocalDateTime expectedStart = LocalDateTime.now(fixedClock);
+    LocalDateTime expectedEnd = expectedStart.plusYears(1);
+
     assertEquals(id, studentCourse.getStudentId());
-    assertEquals(LocalDateTime.now().getHour(), studentCourse.getCourseStartAt().getHour());
-    assertEquals(LocalDateTime.now().plusYears(1).getYear(),
-        studentCourse.getCourseEndAt().getYear());
+    assertEquals(expectedStart.getYear(), studentCourse.getStartAt().getYear());
+    assertEquals(expectedEnd.getYear(), studentCourse.getEndAt().getYear());
   }
 
   @Test
@@ -106,5 +125,10 @@ class StudentServiceTest {
 
     verify(repository, times(1)).updateStudent(studentDetail.getStudent());
     verify(repository, times(1)).updateStudentCourse(studentCourse);
+  }
+
+  @Test
+  void 受講生詳細の登録_引数がnullなら例外が発生すること() {
+    Assertions.assertThrows(NullPointerException.class, () -> sut.registerStudent(null));
   }
 }

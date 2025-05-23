@@ -1,11 +1,14 @@
-package raisetech.student.management.data;
+package raisetech.student.management.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,9 +18,11 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(of = {
+    "id", "name", "kanaName", "nickname", "region", "gender", "age", "email", "remark", "deleted"
+})
 
 public class Student {
-
 
   @NotNull
   @Pattern(regexp = "^\\d+$", message = "数字のみ入力するようにしてください。")
@@ -38,6 +43,7 @@ public class Student {
   @NotBlank
   private String gender;
 
+  @Min(1)
   private int age;
 
   @NotBlank
@@ -45,8 +51,7 @@ public class Student {
   private String email;
 
   private String remark;
-  private boolean isDeleted;
+  private Boolean deleted = false;
 
 }
 
-//課題３１
