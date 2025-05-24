@@ -10,83 +10,94 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mybatis.spring.annotation.MapperScan;
 import org.mybatis.spring.boot.test.autoconfigure.MybatisTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
 import raisetech.student.management.repository.MyBatis.StudentRepository;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.jdbc.core.JdbcTemplate;
+import raisetech.student.management.entity.Status;
+import raisetech.student.management.entity.Student;
+import raisetech.student.management.entity.StudentCourse;
+import raisetech.student.management.repository.mybatis.StudentRepository;
 
 @MybatisTest
+@MapperScan("raisetech.student.management.repository.mybatis")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class StudentRepositoryTest {
 
   @Autowired
   private StudentRepository sut;
 
-  @Test
-  void 受講生の全件検索が行えること() {
-    List<Student> actual = sut.search();
-    assertThat(actual).hasSize(6);
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
 
-    Student expected = new Student();
-    expected.setName("佐藤智美");
-    expected.setKanaName("サトウトモミ");
-    expected.setNickname("ともみ");
-    expected.setRegion("埼玉県川口市");
-    expected.setGender("女");
-    expected.setAge(40);
-    expected.setEmail("tomomi@example.com");
-    expected.setRemark(null);
-    expected.setDeleted(false);
-
-    Student actualStudent = sut.search().get(0);
-    assertThat(actualStudent).isEqualTo(expected);
+  @BeforeEach
+  void setUp() {
+    jdbcTemplate.execute("DELETE FROM application_statuses");
+    jdbcTemplate.execute("DELETE FROM students_courses");
+    jdbcTemplate.execute("DELETE FROM students");
   }
 
   @Test
-  void IDで受講生を検索できる() {
+  void 受講生の全件検索が行えること() {
+    Student testStudent = registerTestStudent("example@example.com");
+    List<Student> actual = sut.search();
+    assertThat(actual).extracting("id").contains(testStudent.getId());
+  }
+
+  @Test
+  void IDで受講生を検索できること() {
     Student student = registerTestStudent("test@example.com");
     Student result = sut.searchStudent(student.getId());
 
-    assertThat(result.getName()).isEqualTo("テスト");
-    assertThat(result.getKanaName()).isEqualTo("テスト");
-    assertThat(result.getNickname()).isEqualTo("テスト");
-    assertThat(result.getRegion()).isEqualTo("奈良県奈良市");
-    assertThat(result.getGender()).isEqualTo("男");
-    assertThat(result.getAge()).isEqualTo(30);
-    assertThat(result.getEmail()).isEqualTo("test@example.com");
-    assertThat(result.getRemark()).isEqualTo("");
-    assertThat(result.isDeleted()).isFalse();
+    assertThat(result).isEqualTo(student);
   }
 
   @Test
-  void 受講生コースの全件検索ができる() {
-    List<StudentCourse> courses = sut.searchStudentCourseList();
+  void 存在しないIDで受講生を検索したらnullが返ること() {
+    Student result = sut.searchStudent("nonexistent-id");
+    assertThat(result).isNull();
+  }
 
+  @Test
+  void 受講生コースの全件検索ができること() {
+    Student student = registerTestStudent("coursecheck@example.com");
+    registerTestCourse(student.getId(), "Javaベーシック", Status.TEMPORARY);
+
+    List<StudentCourse> courses = sut.searchStudentCourseList();
     assertThat(courses).isNotNull();
     assertThat(courses.size()).isGreaterThan(0);
 
     StudentCourse first = courses.get(0);
-    assertThat(first.getCourseName()).isEqualTo("Javaベーシック");
-    assertThat(first.getStudentId()).isNotNull();
-    assertThat(first.getCourseStartAt()).isBefore(first.getCourseEndAt());
+    assertThat(first.getStartAt()).isBefore(first.getEndAt());
   }
 
   @Test
-  void 学生IDで受講生コース情報を検索できる() {
+  void 存在しないIDで受講生コース情報を検索すると空リストが返ること() {
+    List<StudentCourse> result = sut.searchStudentCourse("nonexistent-id");
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  void 受講生IDで受講生コース情報を検索できること() {
     Student student = registerTestStudent("test@example.com");
 
     LocalDateTime fixedStart = LocalDateTime.of(2022, 3, 2, 0, 0);
     LocalDateTime fixedEnd = LocalDateTime.of(2022, 7, 1, 0, 0);
-    String status = "本申込";
+    Status status = Status.TEMPORARY;//不要かも
 
     StudentCourse expected = new StudentCourse(
         UUID.randomUUID().toString(),
         "AWSアドバンス",
-        fixedEnd,
         fixedStart,
+        fixedEnd,
         student.getId(),
-        status
+        status//不要かも
     );
     sut.registerStudentCourse(expected);
 
@@ -94,10 +105,10 @@ class StudentRepositoryTest {
 
     assertThat(results).isNotEmpty();
     StudentCourse result = results.get(0);
-
-    assertThat(result.getCourseStartAt()).isEqualTo(fixedStart);
-    assertThat(result.getCourseEndAt()).isEqualTo(fixedEnd);
+    assertThat(result.getStartAt()).isEqualTo(fixedStart);
+    assertThat(result.getEndAt()).isEqualTo(fixedEnd);
     assertThat(result.getCourseName()).isEqualTo("AWSアドバンス");
+    assertThat(result.getStatus()).isEqualTo(Status.TEMPORARY);
   }
 
   @Test
@@ -128,29 +139,44 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void 受講生を登録できる() {
-    String uniqueEmail = "test+" + UUID.randomUUID() + "@example.com";
-    Student student = registerTestStudent(uniqueEmail);
-    assertThat(student.getId()).isNotNull();
+  void 各受講ステータスで登録と検索が行えること() {
+    Student student = registerTestStudent("statuscheck@example.com");
 
-    Student result = sut.searchStudent(student.getId());
-    assertThat(result.getEmail()).isEqualTo(uniqueEmail);
+    for (Status status : Status.values()) {
+      String uniqueCourse = "コース_" + status.name() + "_" + UUID.randomUUID();
+      registerTestCourse(student.getId(), uniqueCourse, status);
+    }
+
+    List<StudentCourse> results = sut.searchStudentCourse(student.getId());
+
+    assertThat(results).hasSize(Status.values().length);
+    assertThat(results).extracting("status")
+        .containsExactlyInAnyOrder((Object[]) Status.values());
   }
 
   @Test
-  void 受講生コース情報を登録できる() {
+  void 受講生を登録できること() {
+    Student student = registerTestStudent("test@example.com");
+    Student result = sut.searchStudent(student.getId());
+
+    assertThat(result).isEqualTo(student);
+  }
+
+
+  @Test
+  void 受講生コース情報を登録できること() {
     String uniqueEmail = "test+" + UUID.randomUUID() + "@example.com";
     Student student = registerTestStudent(uniqueEmail);
 
     String uniqueCourseName = "Pythonベーシック" + UUID.randomUUID();
-    StudentCourse course = registerTestCourse(student.getId(), uniqueCourseName);
+    StudentCourse course = registerTestCourse(student.getId(), uniqueCourseName, Status.TEMPORARY);
 
     List<StudentCourse> results = sut.searchStudentCourse(student.getId());
     assertThat(results).extracting("courseName").contains(uniqueCourseName);
   }
 
   @Test
-  void 受講生を更新できる() {
+  void 受講生を更新できること() {
     String email = "test+" + UUID.randomUUID() + "@example.com";
     Student student = registerTestStudent(email);
 
@@ -162,12 +188,12 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void 受講生コース情報を更新できる() {
+  void 受講生コース情報を更新できること() {
     String email = "test+" + UUID.randomUUID() + "@example.com";
     Student student = registerTestStudent(email);
 
     String initialCourseName = "旧Javaベーシック" + UUID.randomUUID();
-    StudentCourse course = registerTestCourse(student.getId(), initialCourseName);
+    StudentCourse course = registerTestCourse(student.getId(), initialCourseName, Status.TEMPORARY);
 
     course.setCourseName("新Javaベーシック");
     sut.updateStudentCourse(course);
@@ -176,7 +202,19 @@ class StudentRepositoryTest {
     assertThat(results).extracting("courseName").contains("新Javaベーシック");
   }
 
-  // テストデータ登録用ヘルパーメソッド
+//  @Test
+//  void 受講生コースのステータスを更新できること() {
+//    Student student = registerTestStudent("statusupdate@example.com");
+//    StudentCourse course = registerTestCourse(student.getId(), "AWS", Status.TEMPORARY);
+//
+//    course.setStatus(Status.COMPLETED);
+//    sut.updateStudentCourse(course);
+//
+//    List<StudentCourse> updated = sut.searchStudentCourse(student.getId());
+//    assertThat(updated.get(0).getStatus()).isEqualTo(Status.COMPLETED);
+//  }
+
+  // テスト用の受講生データを登録
   private Student registerTestStudent(String email) {
     Student student = new Student(
         UUID.randomUUID().toString(),
@@ -194,7 +232,8 @@ class StudentRepositoryTest {
     return student;
   }
 
-  private StudentCourse registerTestCourse(String studentId, String courseName) {
+  // テスト用のコースデータを登録
+  private StudentCourse registerTestCourse(String studentId, String courseName, Status status) {
     LocalDateTime fixedStart = LocalDateTime.of(2022, 3, 2, 0, 0);
     LocalDateTime fixedEnd = LocalDateTime.of(2022, 7, 1, 0, 0);
     String status = "本申込";

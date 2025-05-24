@@ -1,22 +1,23 @@
-CREATE TABLE IF NOT EXISTS students
-(
-   id INT AUTO_INCREMENT PRIMARY KEY,
-   name VARCHAR(100) NOT NULL,
-   kanaName VARCHAR(100) NOT NULL,
-   nickname VARCHAR(100),
-   region VARCHAR(100),
-   gender VARCHAR(10),
-   age INT NOT NULL,
-   email VARCHAR(100) NOT NULL,
-   remark varchar(255),
-   deleted boolean
+CREATE TABLE IF NOT EXISTS students (
+    id VARCHAR(36) PRIMARY KEY,
+    name VARCHAR(15),
+    kanaName VARCHAR(25),
+    nickname VARCHAR(15),
+    region VARCHAR(35),
+    gender ENUM('男', '女', 'その他'),
+    age INT NOT NULL,
+    email VARCHAR(30),
+    remark VARCHAR(255),
+    deleted TINYINT(1)
 );
 
-CREATE TABLE IF NOT EXISTS students_courses
-(
-   id INT AUTO_INCREMENT PRIMARY KEY,
-   course_name VARCHAR(100) NOT NULL,
-   course_start_at TIMESTAMP,
-   course_end_at TIMESTAMP,
-   student_id INT NOT NULL
+CREATE TABLE IF NOT EXISTS students_courses (
+    id VARCHAR(36) PRIMARY KEY,
+    course_name VARCHAR(20),
+    course_start_at DATETIME,
+    course_end_at DATETIME,
+    student_id VARCHAR(36) NOT NULL,
+    status_id INT NOT NULL DEFAULT 1,
+    status ENUM('仮申込', '本申込', '受講中', '受講修了') NOT NULL DEFAULT '仮申込',
+    FOREIGN KEY (student_id) REFERENCES students(id)
 );

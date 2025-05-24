@@ -1,54 +1,144 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="raisetech.student.management.repository.StudentRepository">
 
-  <!--受講生の全件検索-->
-  <select id="search" resultType="raisetech.student.management.data.Student">
+<mapper namespace="raisetech.student.management.repository.mybatis.StudentRepository">
+
+  <!-- StudentCourse用のResultMap -->
+  <resultMap id="StudentCourseWithStatusResultMap"
+    type="raisetech.student.management.entity.StudentCourse">
+    <id property="id" column="id"/>
+    <result property="courseName" column="course_name"/>
+    <result property="StartAt" column="course_start_at"/>
+    <result property="EndAt" column="course_end_at"/>
+    <result property="studentId" column="student_id"/>
+    <result property="status" column="status"
+      typeHandler="raisetech.student.management.typehandler.StatusTypeHandler"/>
+  </resultMap>
+
+  <!-- 指定された学生IDの受講生コース一覧を取得 -->
+  <select id="searchStudentCourse" resultMap="StudentCourseWithStatusResultMap">
+    SELECT
+    sc.id,
+    sc.course_name,
+    sc.course_start_at,
+    sc.course_end_at,
+    sc.student_id,
+    sc.status
+    FROM students_courses sc
+    WHERE sc.student_id = #{studentId}
+  </select>
+
+  <!-- すべての受講生コース情報を取得 -->
+  <select id="searchStudentCourseList" resultMap="StudentCourseWithStatusResultMap">
+    SELECT
+    sc.id,
+    sc.course_name,
+    sc.course_start_at,
+    sc.course_end_at,
+    sc.student_id,
+    sc.status
+    FROM students_courses sc
+  </select>
+
+  <!-- 学生全件取得 -->
+  <select id="search" resultType="raisetech.student.management.entity.Student">
     SELECT * FROM students
   </select>
 
-  <!--受講生の検索-->
-  <select id="searchStudent" resultType="raisetech.student.management.data.Student">
+  <!-- 学生IDで検索 -->
+  <select id="searchStudent" resultType="raisetech.student.management.entity.Student">
     SELECT * FROM students WHERE id = #{id}
   </select>
 
-  <!--受講生のコース情報の全件検索-->
-  <select id="searchStudentCourseList"
-    resultType="raisetech.student.management.data.StudentCourse">
-    SELECT * FROM students_courses
+  <!-- 複数条件で学生を検索 -->
+  <select id="searchByConditions"
+    parameterType="raisetech.student.management.dto.StudentSearchRequest"
+    resultType="raisetech.student.management.entity.Student">
+    SELECT s.*
+    FROM students s
+    LEFT JOIN students_courses sc ON s.id = sc.student_id
+    WHERE 1=1
+    <if test="name != null and name != ''">
+      AND s.name LIKE CONCAT('%', #{name}, '%')
+    </if>
+    <if test="region != null and region != ''">
+      AND s.region = #{region}
+    </if>
+    <if test="minAge != null">
+      AND s.age &gt;= #{minAge}
+    </if>
+    <if test="maxAge != null">
+      AND s.age &lt;= #{maxAge}
+    </if>
+    <if test="gender != null and gender != ''">
+      AND s.gender = #{gender}
+    </if>
+    <if test="courseName != null and courseName != ''">
+      AND sc.course_name = #{courseName}
+    </if>
+    <if test="status != null and status != ''">
+      AND sc.status = #{status}
+    </if>
   </select>
 
-  <!--受講生IDに紐づく受講生コース情報を検索-->
-  <select id="searchStudentCourse" resultType="raisetech.student.management.data.StudentCourse">
-    SELECT * FROM students_courses WHERE student_id = #{studentId}
+  <!-- 学生IDのリストから学生コースを取得 -->
+  <select id="searchStudentCourseListForStudents"
+    parameterType="list"
+    resultMap="StudentCourseWithStatusResultMap">
+    SELECT
+    sc.id,
+    sc.course_name,
+    sc.course_start_at,
+    sc.course_end_at,
+    sc.student_id,
+    sc.status
+    FROM students_courses sc
+    WHERE student_id IN
+    <foreach item="id" collection="list" open="(" separator="," close=")">
+      #{id}
+    </foreach>
   </select>
 
-  <!-- 受講生を新規登録 -->
-  <insert id="registerStudent" parameterType="raisetech.student.management.data.Student"
-    useGeneratedKeys="true" keyProperty="id">
+  <!-- 学生コースIDから単体取得 -->
+  <select id="findById" parameterType="java.lang.String"
+    resultMap="StudentCourseWithStatusResultMap">
+    SELECT
+    id,
+    course_name,
+    course_start_at,
+    course_end_at,
+    student_id,
+    status
+    FROM students_courses
+    WHERE id = #{studentCourseId}
+  </select>
+
+  <!-- 新規学生登録 -->
+  <insert id="registerStudent" parameterType="raisetech.student.management.entity.Student">
     INSERT INTO students (
-    name, kanaName, nickname, region, gender, age, email, remark, deleted
+    id, name, kanaName, nickname, region, gender, age, email, remark, deleted
     ) VALUES (
-    #{name}, #{kanaName}, #{nickname}, #{region}, #{gender}, #{age}, #{email}, #{remark}, false
+    #{id}, #{name}, #{kanaName}, #{nickname}, #{region}, #{gender}, #{age}, #{email}, #{remark},
+    #{deleted}
     )
   </insert>
 
-  <!-- 受講生コース情報を新規登録 -->
-  <insert id="registerStudentCourse"
-    parameterType="raisetech.student.management.data.StudentCourse" useGeneratedKeys="true"
-    keyProperty="id">
+  <!-- 新規受講生コース登録 -->
+  <insert id="registerStudentCourse" parameterType="StudentCourse">
     INSERT INTO students_courses (
-    course_name, student_id, course_start_at, course_end_at
+    id, course_name, student_id, course_start_at, course_end_at, status
     ) VALUES (
-    #{courseName}, #{studentId}, #{courseStartAt}, #{courseEndAt}
+    #{id}, #{courseName}, #{studentId}, #{StartAt}, #{EndAt}, #{status}
     )
   </insert>
 
-  <!-- 受講生情報を更新 -->
-  <update id="updateStudent" parameterType="raisetech.student.management.data.Student">
+
+  <!-- 受講生情報更新 -->
+  <update id="updateStudent" parameterType="raisetech.student.management.entity.Student">
     UPDATE students
-    SET name = #{name},
+    SET
+    name = #{name},
     kanaName = #{kanaName},
     nickname = #{nickname},
     region = #{region},
@@ -60,12 +150,33 @@
     WHERE id = #{id}
   </update>
 
-  <!-- 受講生コース情報のコース名を更新 -->
-  <update id="updateStudentCourse" parameterType="raisetech.student.management.data.StudentCourse">
+  <!-- 受講生コース情報更新 -->
+  <update id="updateStudentCourse"
+    parameterType="raisetech.student.management.entity.StudentCourse">
     UPDATE students_courses
-    SET course_name = #{courseName}
+    SET
+    course_name = #{courseName},
+    course_start_at = #{StartAt},
+    course_end_at = #{EndAt},
+    status = #{status, typeHandler=raisetech.student.management.typehandler.StatusTypeHandler}
     WHERE id = #{id}
   </update>
 
-</mapper>
+  <!-- ステータスのみ更新用 -->
+  <update id="updateStatus">
+    UPDATE students_courses
+    SET status = #{status, typeHandler=raisetech.student.management.typehandler.StatusTypeHandler}
+    WHERE id = #{studentCourseId}
+  </update>
 
+  <!-- すべての受講生コースを削除 -->
+  <delete id="deleteAllStudentCourses">
+    DELETE FROM students_courses;
+  </delete>
+
+  <!-- すべての受講生情報を削除 -->
+  <delete id="deleteAllStudents">
+    DELETE FROM students;
+  </delete>
+
+</mapper>

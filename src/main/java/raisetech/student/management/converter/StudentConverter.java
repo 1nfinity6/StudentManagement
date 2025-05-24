@@ -1,12 +1,13 @@
-package raisetech.student.management.controller.converter;
+package raisetech.student.management.converter;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
-import raisetech.student.management.data.Student;
-import raisetech.student.management.data.StudentCourse;
+import raisetech.student.management.entity.Student;
+import raisetech.student.management.entity.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
 
 /**
@@ -24,6 +25,11 @@ public class StudentConverter {
    */
   public List<StudentDetail> convertStudentDetails(List<Student> studentList,
       List<StudentCourse> studentCourseList) {
+
+    if (studentList == null || studentCourseList == null) {
+      return Collections.emptyList();
+    }
+    
     List<StudentDetail> studentDetails = new ArrayList<>();
     studentList.forEach(student -> {
       StudentDetail studentDetail = new StudentDetail();

@@ -5,15 +5,21 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import raisetech.student.management.domain.StudentDetail;
+import raisetech.student.management.dto.StudentSearchRequest;
+import raisetech.student.management.exception.StudentNotFoundException;
 import raisetech.student.management.service.StudentService;
 
 /**
@@ -49,10 +55,21 @@ public class StudentController {
    */
   @Operation(summary = "受講生検索", description = "受講生詳細を検索します。")
   @GetMapping("/student/{id}")
-  public StudentDetail getStudent(
-      @PathVariable @NotNull String id) {
-    return service.searchStudent(id);
+  public StudentDetail getStudent(@PathVariable @NotNull String id) {
+    StudentDetail studentDetail = service.searchStudent(id);
+    if (studentDetail == null) {
+      throw new StudentNotFoundException("指定されたIDの受講生が見つかりません");
+    }
+    return studentDetail;
   }
+
+  @ExceptionHandler(StudentNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public String handleStudentNotFound(StudentNotFoundException ex) {
+    return ex.getMessage();
+  }
+
 
   /**
    * 受講生詳細のを登録します。
@@ -68,6 +85,7 @@ public class StudentController {
     return ResponseEntity.ok(responseStudentDetail);
   }
 
+
   /**
    * 受講生詳細の更新を行います。キャンセルフラグの更新も行います。(論理削除)
    *
@@ -80,5 +98,12 @@ public class StudentController {
       @RequestBody @Valid StudentDetail studentDetail) {
     service.updateStudent(studentDetail);
     return ResponseEntity.ok("更新処理が成功しました。");
+  }
+
+  @Operation(summary = "条件検索", description = "指定した条件で受講生を検索します。")
+  @PostMapping("/searchStudents")
+  public List<StudentDetail> searchStudents(
+      @RequestBody StudentSearchRequest request) {
+    return service.searchStudents(request);
   }
 }

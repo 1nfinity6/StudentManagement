@@ -1,14 +1,15 @@
-package raisetech.student.management.Converter;
+package raisetech.student.management.converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import raisetech.student.management.controller.converter.StudentConverter;
-import raisetech.student.management.data.Student;
-import raisetech.student.management.data.StudentCourse;
+import raisetech.student.management.entity.Status;
+import raisetech.student.management.entity.Student;
+import raisetech.student.management.entity.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
 
 class StudentConverterTest {
@@ -27,8 +28,8 @@ class StudentConverterTest {
     StudentCourse studentCourse = new StudentCourse();
     studentCourse.setId("1");
     studentCourse.setCourseName("Javaベーシック");
-    studentCourse.setCourseEndAt(LocalDateTime.now().plusYears(1));
-    studentCourse.setCourseStartAt(LocalDateTime.now());
+    studentCourse.setStartAt(LocalDateTime.now());
+    studentCourse.setEndAt(LocalDateTime.now().plusYears(1));
     studentCourse.setStudentId("1");
 
     List<Student> studentList = List.of(student);
@@ -48,8 +49,8 @@ class StudentConverterTest {
     StudentCourse studentCourse = new StudentCourse();
     studentCourse.setId("1");
     studentCourse.setCourseName("Javaベーシック");
-    studentCourse.setCourseEndAt(LocalDateTime.now().plusYears(1));
-    studentCourse.setCourseStartAt(LocalDateTime.now());
+    studentCourse.setStartAt(LocalDateTime.now());
+    studentCourse.setEndAt(LocalDateTime.now().plusYears(1));
     studentCourse.setStudentId("2");
 
     List<Student> studentList = List.of(student);
@@ -61,10 +62,45 @@ class StudentConverterTest {
     assertThat(actual.get(0).getStudentCourseList()).isEmpty();
   }
 
-  private static Student createStudent() {
+  @Test
+  void 空リストを渡した場合は空の受講生詳細リストが返ること() {
+    List<StudentDetail> actual = sut.convertStudentDetails(Collections.emptyList(),
+        Collections.emptyList());
+    assertThat(actual).isEmpty();
+  }
 
+  @Test
+  void 複数受講生と複数コースが正しく紐づくこと() {
+    Student student1 = createStudentWithId("1");
+    Student student2 = createStudentWithId("2");
+
+    StudentCourse course1 = createCourse("A", "Java", "1");
+    StudentCourse course2 = createCourse("B", "Python", "2");
+
+    List<StudentDetail> actual = sut.convertStudentDetails(
+        List.of(student1, student2),
+        List.of(course1, course2)
+    );
+
+    assertThat(actual).hasSize(2);
+    assertThat(actual.get(0).getStudentCourseList()).contains(course1);
+    assertThat(actual.get(1).getStudentCourseList()).contains(course2);
+  }
+
+  @Test
+  void nullが渡された場合は空の受講生詳細リストが返ること() {
+    List<StudentDetail> actual = sut.convertStudentDetails(null, null);
+    assertThat(actual).isEmpty();
+  }
+
+  private static Student createStudent() {
+    return createStudentWithId("1");
+  }
+
+  // 任意のIDでStudent作成
+  private static Student createStudentWithId(String id) {
     Student student = new Student();
-    student.setId("1");
+    student.setId(id);
     student.setName("江並公史");
     student.setKanaName("エナミコウジ");
     student.setNickname("こうじ");
@@ -76,5 +112,16 @@ class StudentConverterTest {
     student.setDeleted(false);
     return student;
   }
-}
 
+  // コース生成の共通化
+  private static StudentCourse createCourse(String id, String name, String studentId) {
+    return new StudentCourse(
+        id,
+        name,
+        LocalDateTime.now(),
+        LocalDateTime.now().plusYears(1),
+        studentId,
+        Status.TEMPORARY
+    );
+  }
+}

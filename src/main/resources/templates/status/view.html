@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>申込状況確認・編集</title>
+</head>
+<body>
+<h1>コース申込状況</h1>
+
+<p>コースID: <span th:text="${courseId}">コースID</span></p>
+
+<div th:if="${status != null}">
+  <p>現在の申込状況: <span th:text="${status.status}">ステータス</span></p>
+
+  <form th:action="@{/status/update}" method="post">
+    <input type="hidden" name="studentCourseId" th:value="${status.studentCourse.id}"/>
+
+    <label for="status">申込状況を変更する:</label>
+    <select name="status" id="status">
+      <option
+          th:each="s : ${T(raisetech.student.management.entity.ApplicationStatus.Status).values()}"
+          th:value="${s}"
+          th:text="${s}"
+          th:selected="${s} == ${status.status}">
+      </option>
+    </select>
+
+    <button type="submit">更新</button>
+  </form>
+</div>
+
+<div th:if="${status == null}">
+  <p>申込状況はまだ登録されていません。</p>
+
+  <form th:action="@{/status/register}" method="post">
+    <input type="hidden" name="studentCourseId" th:value="${courseId}"/>
+
+    <label for="status">申込状況を選択:</label>
+    <select name="status" id="status">
+      <option
+          th:each="s : ${T(raisetech.student.management.entity.ApplicationStatus.Status).values()}"
+          th:value="${s}"
+          th:text="${s}">
+      </option>
+    </select>
+
+    <button type="submit">登録</button>
+  </form>
+</div>
+
+</body>
+</html>
+
