@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import raisetech.student.management.entity.Status;
 import raisetech.student.management.entity.Student;
 import raisetech.student.management.entity.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
@@ -114,12 +115,13 @@ class StudentConverterTest {
 
   // コース生成の共通化
   private static StudentCourse createCourse(String id, String name, String studentId) {
-    StudentCourse course = new StudentCourse();
-    course.setId(id);
-    course.setCourseName(name);
-    course.setStartAt(LocalDateTime.now());
-    course.setEndAt(LocalDateTime.now().plusYears(1));
-    course.setStudentId(studentId);
-    return course;
+    return new StudentCourse(
+        id,
+        name,
+        LocalDateTime.now(),
+        LocalDateTime.now().plusYears(1),
+        studentId,
+        Status.TEMPORARY
+    );
   }
 }

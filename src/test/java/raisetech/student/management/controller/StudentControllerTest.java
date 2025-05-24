@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import jakarta.validation.ConstraintViolation;
@@ -18,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -26,6 +29,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import raisetech.student.management.converter.StudentConverter;
 import raisetech.student.management.domain.StudentDetail;
+import raisetech.student.management.entity.Status;
 import raisetech.student.management.entity.Student;
 import raisetech.student.management.entity.StudentCourse;
 import raisetech.student.management.exception.StudentNotFoundException;
@@ -55,7 +59,8 @@ class StudentControllerTest {
   void 受講生詳細の一覧検索が実行できて空のリストが返ってくること() throws Exception {
     when(studentService.searchStudentList()).thenReturn(Collections.emptyList());
     mockMvc.perform(get("/studentList"))
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andExpect(content().json("[]"));
 
     verify(studentService, times(1)).searchStudentList();
   }
@@ -64,23 +69,27 @@ class StudentControllerTest {
   void 受講生詳細の検索が実行できて空で返ってくること() throws Exception {
     String id = "999";
 
-    Student student = new Student();
-    student.setId("999");
-    student.setName("テスト 太郎");
-    student.setKanaName("テスト タロウ");
-    student.setNickname("テスト");
-    student.setRegion("東京都");
-    student.setGender("男");
-    student.setEmail("test@example.com");
-    student.setAge(30);
-    student.setDeleted(false);
+    Student student = new Student(
+        "999",
+        "テスト 太郎",
+        "テスト タロウ",
+        "テスト",
+        "東京都",
+        "男",
+        30,
+        "test@example.com",
+        null,
+        false
+    );
 
-    StudentCourse course = new StudentCourse();
-    course.setId("1");
-    course.setCourseName("Javaスタンダード");
-    course.setStartAt(LocalDateTime.of(2024, 4, 1, 0, 0));
-    course.setEndAt(LocalDateTime.of(2024, 9, 1, 0, 0));
-    course.setStudentId("999");
+    StudentCourse course = new StudentCourse(
+        "1",
+        "Javaスタンダード",
+        LocalDateTime.of(2024, 4, 1, 0, 0),
+        LocalDateTime.of(2024, 9, 1, 0, 0),
+        "999",
+        Status.TEMPORARY
+    );
 
     StudentDetail detail = new StudentDetail();
     detail.setStudent(student);
@@ -88,7 +97,8 @@ class StudentControllerTest {
 
     when(studentService.searchStudent(id)).thenReturn(new StudentDetail());
     mockMvc.perform(get("/student/{id}", id))
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andExpect(content().json("{}"));
 
     verify(studentService, times(1)).searchStudent(id);
   }
@@ -139,7 +149,11 @@ class StudentControllerTest {
                  }
                 """
         ))
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.student").value(Matchers.nullValue()))
+        .andExpect(jsonPath("$.student.id").doesNotExist())
+        .andExpect(jsonPath("$.studentCourseList").isArray())
+        .andExpect(jsonPath("$.studentCourseList").isEmpty());
     verify(studentService, times(1)).registerStudent(any());
   }
 
@@ -152,7 +166,7 @@ class StudentControllerTest {
   }
 
   @Test
-  void 受講生詳細の更新が実行できて空で返ってくること() throws Exception {
+  void 受講生詳細の更新が実行できて空のレスポンスで200OKが返ってくる事() throws Exception {
     doNothing().when(studentService).updateStudent(any());
 
     mockMvc.perform(put("/updateStudent").contentType(MediaType.APPLICATION_JSON).content(
@@ -189,16 +203,18 @@ class StudentControllerTest {
 
   @Test
   void 受講生詳細の受講生で適切な値を入力した時にチェックに異常が発生しない事() {
-    Student student = new Student();
-    student.setId("1");
-    student.setName("江並公史");
-    student.setKanaName("エナミコウジ");
-    student.setNickname("こーじ");
-    student.setRegion("奈良県奈良市");
-    student.setGender("その他");
-    student.setEmail("kouji@exaple.com");
-    student.setAge(25);
-    student.setDeleted(false);
+    Student student = new Student(
+        "1",
+        "江並公史",
+        "エナミコウジ",
+        "こーじ",
+        "奈良県奈良市",
+        "その他",
+        25,
+        "kouji@exaple.com",
+        "",
+        false
+    );
 
     Set<ConstraintViolation<Student>> violations = validator.validate(student);
     assertThat(violations).isEmpty();
@@ -206,16 +222,18 @@ class StudentControllerTest {
 
   @Test
   void 受講生詳細の受講生でIDに数字以外を用いた時に入力チェックに掛かる事() {
-    Student student = new Student();
-    student.setId("テストです。");
-    student.setName("江並公史");
-    student.setKanaName("エナミコウジ");
-    student.setNickname("こーじ");
-    student.setRegion("奈良県奈良市");
-    student.setGender("その他");
-    student.setEmail("kouji@exaple.com");
-    student.setAge(25);
-    student.setDeleted(false);
+    Student student = new Student(
+        "テストです。",
+        "江並公史",
+        "エナミコウジ",
+        "こーじ",
+        "奈良県奈良市",
+        "その他",
+        25,
+        "kouji@exaple.com",
+        "",
+        false
+    );
 
     Set<ConstraintViolation<Student>> violations = validator.validate(student);
 

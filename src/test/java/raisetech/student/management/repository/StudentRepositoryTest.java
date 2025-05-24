@@ -43,28 +43,21 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void IDで受講生を検索できる() {
+  void IDで受講生を検索できること() {
     Student student = registerTestStudent("test@example.com");
     Student result = sut.searchStudent(student.getId());
-    assertThat(result.getName()).isEqualTo("テスト");
-    assertThat(result.getKanaName()).isEqualTo("テスト");
-    assertThat(result.getNickname()).isEqualTo("テスト");
-    assertThat(result.getRegion()).isEqualTo("奈良県奈良市");
-    assertThat(result.getGender()).isEqualTo("男");
-    assertThat(result.getAge()).isEqualTo(30);
-    assertThat(result.getEmail()).isEqualTo("test@example.com");
-    assertThat(result.getRemark()).isEqualTo("");
-    assertThat(result.getDeleted()).isFalse();
+
+    assertThat(result).isEqualTo(student);
   }
 
   @Test
-  void 存在しないIDで受講生を検索したらnullが返る() {
+  void 存在しないIDで受講生を検索したらnullが返ること() {
     Student result = sut.searchStudent("nonexistent-id");
     assertThat(result).isNull();
   }
 
   @Test
-  void 受講生コースの全件検索ができる() {
+  void 受講生コースの全件検索ができること() {
     Student student = registerTestStudent("coursecheck@example.com");
     registerTestCourse(student.getId(), "Javaベーシック", Status.TEMPORARY);
 
@@ -77,13 +70,13 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void 存在しないIDで受講生コース情報を検索すると空リストが返る() {
+  void 存在しないIDで受講生コース情報を検索すると空リストが返ること() {
     List<StudentCourse> result = sut.searchStudentCourse("nonexistent-id");
     assertThat(result).isEmpty();
   }
 
   @Test
-  void 受講生IDで受講生コース情報を検索できる() {
+  void 受講生IDで受講生コース情報を検索できること() {
     Student student = registerTestStudent("test@example.com");
 
     LocalDateTime fixedStart = LocalDateTime.of(2022, 3, 2, 0, 0);
@@ -127,17 +120,16 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void 受講生を登録できる() {
-    String uniqueEmail = "test+" + UUID.randomUUID() + "@example.com";
-    Student student = registerTestStudent(uniqueEmail);
-    assertThat(student.getId()).isNotNull();
-
+  void 受講生を登録できること() {
+    Student student = registerTestStudent("test@example.com");
     Student result = sut.searchStudent(student.getId());
-    assertThat(result.getEmail()).isEqualTo(uniqueEmail);
+
+    assertThat(result).isEqualTo(student);
   }
 
+
   @Test
-  void 受講生コース情報を登録できる() {
+  void 受講生コース情報を登録できること() {
     String uniqueEmail = "test+" + UUID.randomUUID() + "@example.com";
     Student student = registerTestStudent(uniqueEmail);
 
@@ -149,7 +141,7 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void 受講生を更新できる() {
+  void 受講生を更新できること() {
     String email = "test+" + UUID.randomUUID() + "@example.com";
     Student student = registerTestStudent(email);
 
@@ -161,7 +153,7 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void 受講生コース情報を更新できる() {
+  void 受講生コース情報を更新できること() {
     String email = "test+" + UUID.randomUUID() + "@example.com";
     Student student = registerTestStudent(email);
 
@@ -176,7 +168,7 @@ class StudentRepositoryTest {
   }
 
   @Test
-  void 受講生コースのステータスを更新できる() {
+  void 受講生コースのステータスを更新できること() {
     Student student = registerTestStudent("statusupdate@example.com");
     StudentCourse course = registerTestCourse(student.getId(), "AWS", Status.TEMPORARY);
 
@@ -186,7 +178,7 @@ class StudentRepositoryTest {
     List<StudentCourse> updated = sut.searchStudentCourse(student.getId());
     assertThat(updated.get(0).getStatus()).isEqualTo(Status.COMPLETED);
   }
-  
+
   // テスト用の受講生データを登録
   private Student registerTestStudent(String email) {
     Student student = new Student(

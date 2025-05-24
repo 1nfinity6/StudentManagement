@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,7 @@ import lombok.ToString;
 @Schema(description = "受講生コース情報")
 @Getter
 @Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "students_courses")
