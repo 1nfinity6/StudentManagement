@@ -25,12 +25,14 @@ class StudentConverterTest {
   void 受講生のリストと受講生コース情報のリストを渡して受講生詳細リストが作成できること() {
     Student student = createStudent();
 
-    StudentCourse studentCourse = new StudentCourse();
-    studentCourse.setId("1");
-    studentCourse.setCourseName("Javaベーシック");
-    studentCourse.setStartAt(LocalDateTime.now());
-    studentCourse.setEndAt(LocalDateTime.now().plusYears(1));
-    studentCourse.setStudentId("1");
+    StudentCourse studentCourse = new StudentCourse(
+        "1",
+        "Javaベーシック",
+        LocalDateTime.now(),
+        LocalDateTime.now().plusYears(1),
+        "1",
+        null
+    );
 
     List<Student> studentList = List.of(student);
     List<StudentCourse> studentCourseList = List.of(studentCourse);
@@ -46,12 +48,17 @@ class StudentConverterTest {
   void 受講生リストと受講生コース情報リストを渡した時に紐づかない受講生コース情報は除外されること() {
     Student student = createStudent();
 
-    StudentCourse studentCourse = new StudentCourse();
-    studentCourse.setId("1");
-    studentCourse.setCourseName("Javaベーシック");
-    studentCourse.setStartAt(LocalDateTime.now());
-    studentCourse.setEndAt(LocalDateTime.now().plusYears(1));
-    studentCourse.setStudentId("2");
+    LocalDateTime startAt = LocalDateTime.now();
+    LocalDateTime endAt = startAt.plusYears(1);
+
+    StudentCourse studentCourse = new StudentCourse(
+        "1",
+        "Javaベーシック",
+        startAt,
+        endAt,
+        "2",
+        null
+    );
 
     List<Student> studentList = List.of(student);
     List<StudentCourse> studentCourseList = List.of(studentCourse);
@@ -99,18 +106,18 @@ class StudentConverterTest {
 
   // 任意のIDでStudent作成
   private static Student createStudentWithId(String id) {
-    Student student = new Student();
-    student.setId(id);
-    student.setName("江並公史");
-    student.setKanaName("エナミコウジ");
-    student.setNickname("こうじ");
-    student.setRegion("奈良県奈良市");
-    student.setGender("男");
-    student.setAge(36);
-    student.setEmail("koji@example.com");
-    student.setRemark("");
-    student.setDeleted(false);
-    return student;
+    return new Student(
+        id,
+        "江並公史",
+        "エナミコウジ",
+        "こうじ",
+        "奈良県奈良市",
+        "男",
+        36,
+        "koji@example.com",
+        "",
+        false
+    );
   }
 
   // コース生成の共通化

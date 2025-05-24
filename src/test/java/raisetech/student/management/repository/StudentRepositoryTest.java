@@ -97,11 +97,10 @@ class StudentRepositoryTest {
 
     assertThat(results).isNotEmpty();
     StudentCourse result = results.get(0);
-    assertThat(result.getStartAt()).isEqualTo(fixedStart);
-    assertThat(result.getEndAt()).isEqualTo(fixedEnd);
-    assertThat(result.getCourseName()).isEqualTo("AWSアドバンス");
-    assertThat(result.getStatus()).isEqualTo(Status.TEMPORARY);
+    
+    assertThat(result).isEqualTo(expected);
   }
+
 
   @Test
   void 各受講ステータスで登録と検索が行えること() {
